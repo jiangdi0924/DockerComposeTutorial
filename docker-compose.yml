@@ -1,0 +1,34 @@
+version: '3'
+
+services: 
+  cli:
+    image: nestjs/cli
+    working_dir: /workspace
+    volumes: 
+      - ./app:/workspace
+    tty: true
+  database:
+    image: mysql:${MYSQL_VERSION}
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports: 
+      - ${MYSQL_PORT}:3306
+    volumes: 
+      - ${MYSQL_DATADIR}/db:/var/lib/mysql
+      - ${MYSQL_CONFDIR}:/etc/mysql/conf.d
+  nest: 
+    image: node:${NODE_VERSION}
+    working_dir: /home/app
+    command: npm config set register https://registry.npm.taobao.org
+    command: npm run start:dev
+    volumes:
+      - ${PROJECT_DIR}:/home/app
+    ports:
+      - ${APP_PORT}:3000
+    depends_on:
+      - database
+    
+          
